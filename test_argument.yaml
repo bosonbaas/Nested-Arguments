@@ -1,0 +1,64 @@
+label: >
+  Suppose that <claim id="c1">x is even</claim>. Then <claim id="c2">there exists some integer k</claim> such 
+  that <claim id="c3">x = 2k</claim> by <reason id="r1">the definition of even</reason>. Note that <claim id="c3">2x = 2(2k)</claim>. 
+  Since <claim id="c4">2k is an integer</claim>, <claim id="c5">2x must be even</claim>.
+
+claims:
+  - id: c1
+    label: x is even
+    position: { x: 0, y: 0 }
+
+  - id: c2
+    label: k is an integer
+    position: { x: 100, y: 200 }
+
+  - id: c3
+    label: x = 2k
+    position: { x: -100, y: 200 }
+
+  - id: c4
+    label: 2x = 2(2k)
+    position: { x: -100, y: 400 }
+
+  - id: c5
+    label: 2k is an integer
+    position: { x: 100, y: 400 }
+
+  - id: c6
+    label: 2x must be even
+    position: { x: 0, y: 600 }
+
+reasons:
+  - id: r1
+    label: "Definition of Even"
+    position: { x: 0, y: 100 }
+    dependencies:
+      d1: c1
+    conclusions:
+      c1: c3
+      c2: c2
+
+  - id: r2
+    label: "Substitution"
+    position: { x: -100, y: 300 }
+    dependencies:
+      d1: c3
+    conclusions:
+      c1: c4
+
+  - id: r3
+    label: "Closure of integers under multiplication"
+    position: { x: 100, y: 300 }
+    dependencies:
+      d1: c2
+    conclusions:
+      c1: c5
+
+  - id: r4
+    label: "Definition of Even"
+    position: { x: 0, y: 500 }
+    dependencies:
+      d1: c4
+      d2: c5
+    conclusions:
+      c1: c6
