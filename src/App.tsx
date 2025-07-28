@@ -1,15 +1,16 @@
 // src/App.tsx
-import React from "react";
+//import React from "react";
 import MarkupParser from "./components/MarkupParser";
-import FilePanel from "./components/FilePanel"; // ⬅️ Import it!
+import FilePanel from "./components/FilePanel";
 import GraphCanvas from "./components/GraphCanvas";
-import MarkupControls from "./components/MarkupControls.tsx";
+import MarkupControls from "./components/MarkupControls";
 import { useStore } from "./lib/stateStore";
 
 export default function App() {
   const toggleView = useStore(state => state.toggleDependencyView);
   const traceDeps = useStore(state => state.traceDependenciesFrom);
-  const graph = useStore(state => state.graph);
+  const nodes = useStore(state => state.nodes);
+  const edges = useStore(state => state.edges);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
@@ -22,18 +23,16 @@ export default function App() {
         <br />
         <button
           onClick={() => {
-            const last = [...graph].reverse().find(n => n.type === "claim");
+            const last = [...nodes].reverse().find(n => n.type === "claim");
             if (last) traceDeps(last.id);
           }}
         >
           🔍 Trace Dependencies of Last Claim
         </button>
-				<button onClick={() => console.log("Graph debug:", useStore.getState().graph)}>
+				<button onClick={() => console.log("Graph debug:", [useStore.getState().nodes, useStore.getState().edges])}>
 				  🧪 Print Graph State
 				</button>
 
-
-        {/* 🗂️ Render FilePanel here */}
         <FilePanel />
       </div>
 

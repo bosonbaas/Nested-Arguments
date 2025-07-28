@@ -1,32 +1,49 @@
 // src/lib/stateStore.ts
 import { create } from "zustand";
+import { applyNodeChanges, applyEdgeChanges } from 'reactflow';
 
 export type Node = {
+  // This ID must be unique. Text is used to give a human-readable string
   id: string;
   type: "claim" | "reason";
-  text: string;
   position: { x: number; y: number };
   width: number;
   height: number;
-
+  // Dependencies describe the input ports and their ids
+  data: {
+    label: string;
+    dependencies: string[];
+    conclusions: string[];
+  }
 };
+
+export type Edge = {
+  id: string;
+  source: string;
+  sourceHandle: string;
+  target: string;
+  targetHandle: string;
+}
 
 export type Highlight = {
   id: string;
   startOffset: number;
   endOffset: number;
-  type: "claim" | "reason" | "annotation" | "dependency";
+  type: string;//"claim" | "reason" | "annotation" | "dependency";
   refId?: string;
   color?: string;
 };
 
 interface StoreState {
-  graph: Node[];
+  nodes: Node[];
+  edges: Edge[];
   highlights: Highlight[];
   text: string;
   dependencyView: boolean;
 
-  setGraph: (graph: Node[]) => void;
+  setGraph: (nodes: Node[], edges: Edge[]) => void;
+  setNodes: (nodes: Node[]) => void;
+  setEdges: (edges: Edge[]) => void;
   setHighlights: (h: Highlight[]) => void;
   setText: (txt: string) => void;
 
@@ -36,50 +53,62 @@ interface StoreState {
   toggleDependencyView: () => void;
   traceDependenciesFrom: (nodeId: string) => void;
 
+  onNodesChange: (changes: any) => void;
+  onEdgesChange: (changes: any) => void;
+  onConnect: (connection: any) => void;
   updateGraph: (mutator: (draft: Node[]) => void) => void;
 }
 
-let nodeCounter = 0;
-
 export const useStore = create<StoreState>((set, get) => ({
-  graph: [],
+  nodes: [],
+  edges: [],
   highlights: [],
   text: "",
   dependencyView: false,
 
-  setGraph: graph => set(() => ({ graph })),
+  setGraph: (nodes, edges) => set(() => ({ nodes, edges })),
+  setNodes: (nodes) => set(() => ({nodes})),
+  setEdges: (edges) => set(() => ({edges})),
   setHighlights: h => set(() => ({ highlights: h })),
   setText: txt => set(() => ({ text: txt })),
 
   toggleDependencyView: () =>
     set(state => ({ dependencyView: !state.dependencyView })),
 
-  addClaim: text =>
+  addClaim: label =>
     set(state => ({
-      graph: [
-        ...state.graph,
+      nodes: [
+        ...state.nodes,
         {
-          id: `claim-${++nodeCounter}`,
+          id: `claim-${state.nodes.length}`,
           type: "claim",
           width: 100,
           height: 50,
-          text,
-          position: { x: 100, y: 100 + nodeCounter * 40 }
+          position: { x: 100, y: 100 + state.nodes.length * 40 },
+          data: {
+            label,
+            dependencies: [],
+            conclusions: []
+          }
         }
       ]
     })),
 
-  addReason: text =>
+  addReason: label =>
     set(state => ({
-      graph: [
-        ...state.graph,
+      nodes: [
+        ...state.nodes,
         {
-          id: `reason-${++nodeCounter}`,
+          id: `reason-${state.nodes.length}`,
           type: "reason",
           width: 100,
           height: 50,
-          text,
-          position: { x: 300, y: 100 + nodeCounter * 40 }
+          position: { x: 300, y: 100 + state.nodes.length * 40 },
+          data:{
+            label,
+            dependencies: [],
+            conclusions: []
+          }
         }
       ]
     })),
@@ -129,6 +158,24 @@ export const useStore = create<StoreState>((set, get) => ({
 
     dfs(nodeId, 0, baseHue);
     set(() => ({ highlights }));
+  },
+
+  onNodesChange: (changes) => {
+    set({nodes: applyNodeChanges(changes, get().nodes)})
+    console.log("nodes changed")
+  },
+  onEdgesChange: (changes) => {
+    set({
+      edges: applyEdgeChanges(changes, get().edges),
+    });
+  },
+  onConnect: (connection) => {
+    set((state) => ({
+      edges: [
+        ...state.edges,
+        {...connection, id: `edge-${state.edges.length}`}
+      ]
+    }));
   },
 
   updateGraph: (mutator) => {

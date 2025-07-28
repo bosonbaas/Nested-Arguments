@@ -1,12 +1,11 @@
 // src/components/nodes/ReasonNode.tsx
-import React from "react";
 import { Handle, Position, NodeResizer } from "reactflow";
 import { useStore } from "../../lib/stateStore";
 
-export default function ReasonNode({ id, data, selected }) {
+export default function ReasonNode({ id, data, selected } : any) {
   const updateGraph = useStore(s => s.updateGraph);
-  const inputKeys = Object.keys(data.dependencies || {});
-  const outputKeys = Object.keys(data.conclusions || {});
+  const inputKeys = data.dependencies || [];
+  const outputKeys = data.conclusions || [];
   const inputSpacing = 100 / (inputKeys.length + 1);
   const outputSpacing = 100 / (outputKeys.length + 1);
 
@@ -28,12 +27,12 @@ export default function ReasonNode({ id, data, selected }) {
           });
         }}
       />
-			{inputKeys.map((role, i) => (
+			{inputKeys.map((role : string, i : number) => (
         <Handle
-          key={`in-${role}`}
+          key={role}
           type="target"
           position={Position.Top}
-          id={`in-${role}`}
+          id={role}
           title={role}
           style={{
             pointerEvents: "auto",
@@ -58,12 +57,12 @@ export default function ReasonNode({ id, data, selected }) {
 
       </div>
 
-      {outputKeys.map((role, i) => (
+      {outputKeys.map((role : string, i : number) => (
         <Handle
-          key={`out-${role}`}
+          key={role}
           type="source"
           position={Position.Bottom}
-          id={`out-${role}`}
+          id={role}
           title={role}
           style={{
             pointerEvents: "auto",

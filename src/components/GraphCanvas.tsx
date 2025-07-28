@@ -1,71 +1,42 @@
 // src/components/GraphCanvas.tsx
-import React, { useMemo } from "react";
+import { useCallback } from "react";
 import ReactFlow, {
   Background,
   Controls,
-  MiniMap,
-  Node,
-  Edge
+  MiniMap
 } from "reactflow";
+import { useShallow } from 'zustand/react/shallow';
 import "reactflow/dist/style.css";
 import { useStore } from "../lib/stateStore";
 import ClaimNode from "./nodes/ClaimNode";
 import ReasonNode from "./nodes/ReasonNode";
 
+
+const nodeTypes = {
+  claim: ClaimNode, reason: ReasonNode
+};
+const selector = (state : any) => ({
+  nodes: state.nodes,
+  edges: state.edges,
+  onNodesChange: state.onNodesChange,
+  onEdgesChange: state.onEdgesChange,
+  onConnect: state.onConnect,
+});
+
 export default function GraphCanvas() {
-  const graph = useStore(state => state.graph);
-
-  const nodes: Node[] = useMemo(
-    () =>
-      graph.map(n => ({
-        id: n.id,
-        type: n.type,
-        position: n.position,
-        // ← pass width/height from your graph
-        width: n.width,
-        height: n.height,
-        data: {
-          label: n.text,
-          dependencies: n.dependencies,
-          conclusions: n.conclusions
-        }
-      })),
-    [graph]
+  const { nodes, edges, onNodesChange, onEdgesChange, onConnect } = useStore(
+    useShallow(selector),
   );
-
-  const edges: Edge[] = useMemo(() => {
-    const result: Edge[] = [];
-    for (const node of graph) {
-      if (node.type === "reason") {
-        for (const [role, claimId] of Object.entries(node.dependencies || {})) {
-          result.push({
-            id: `e-${claimId}-${node.id}-${role}`,
-            source: claimId,
-            target: node.id,
-            targetHandle: `in-${role}`,
-            type: "smoothstep"
-          });
-        }
-        for (const [role, claimId] of Object.entries(node.conclusions || {})) {
-          result.push({
-            id: `e-${node.id}-${claimId}-${role}`,
-            source: node.id,
-            sourceHandle: `out-${role}`,
-            target: claimId,
-            type: "smoothstep"
-          });
-        }
-      }
-    }
-    return result;
-  }, [graph]);
 
   return (
     <div style={{ height: "100%", width: "100%" }}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        nodeTypes={{ claim: ClaimNode, reason: ReasonNode }}
+        nodeTypes={nodeTypes}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
+        onConnect={onConnect}
         fitView
       >
         <Background />

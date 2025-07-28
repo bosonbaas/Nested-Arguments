@@ -1,9 +1,8 @@
 // src/components/nodes/ClaimNode.tsx
-import React from "react";
 import { Handle, Position, NodeResizer } from "reactflow";
 import { useStore } from "../../lib/stateStore";
 
-export default function ClaimNode({ id, data, selected }) {
+export default function ClaimNode({ id, data, selected } : any) {
   const updateGraph = useStore(s => s.updateGraph);
 
   return (
@@ -12,6 +11,7 @@ export default function ClaimNode({ id, data, selected }) {
         type="target"
         position={Position.Top}
         id="in"
+        key="in"
         style={{
           pointerEvents: "auto",
           left: "50%",
@@ -53,6 +53,7 @@ export default function ClaimNode({ id, data, selected }) {
         type="source"
         position={Position.Bottom}
         id="out"
+        key="out"
         style={{
           pointerEvents: "auto",
           left: "50%",
