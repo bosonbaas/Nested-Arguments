@@ -10,7 +10,7 @@ export default function ClaimNode({ id, data, selected } : any) {
       <Handle
         type="target"
         position={Position.Top}
-        id="in"
+        id="claim-in"
         key="in"
         style={{
           pointerEvents: "auto",
@@ -52,7 +52,7 @@ export default function ClaimNode({ id, data, selected } : any) {
       <Handle
         type="source"
         position={Position.Bottom}
-        id="out"
+        id="claim-out"
         key="out"
         style={{
           pointerEvents: "auto",

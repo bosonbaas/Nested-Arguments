@@ -1,5 +1,5 @@
 // src/components/MarkupParser.tsx
-import React, { useEffect, useRef } from "react";
+import { useEffect, useRef } from "react";
 import { useStore } from "../lib/stateStore";
 
 export default function MarkupParser() {
@@ -26,6 +26,7 @@ export default function MarkupParser() {
   return (
     <div
       ref={ref}
+      id="argument_pane"
       contentEditable
       suppressContentEditableWarning
       onInput={handleInput}
@@ -43,13 +44,23 @@ export default function MarkupParser() {
 
 // Converts <claim id="c1">text</claim> into styled <span> for editing
 function tagToSpan(text: string): string {
-  return text
-    .replace(/<claim id="(.*?)">(.*?)<\/claim>/g, (_, id, content) =>
-      `<span class="highlight claim" data-refid="${id}">${content}</span>`
-    )
-    .replace(/<reason id="(.*?)">(.*?)<\/reason>/g, (_, id, content) =>
-      `<span class="highlight reason" data-refid="${id}">${content}</span>`
-    );
+  const div = document.createElement("div");
+  div.innerHTML = text;
+  div.querySelectorAll("claim").forEach((c) => {
+    const span = document.createElement("span")
+    span.setAttribute("class", "highlight claim")
+    span.setAttribute("data-refid", c.id)
+    span.innerHTML = c.innerHTML
+    c.replaceWith(span)
+  })
+  div.querySelectorAll("reason").forEach((r) => {
+    const span = document.createElement("span")
+    span.setAttribute("class", "highlight reason")
+    span.setAttribute("data-refid", r.id)
+    span.innerHTML = r.innerHTML
+    r.replaceWith(span)
+  })
+  return div.innerHTML
 }
 
 // Converts back from styled <span> into tag-based text

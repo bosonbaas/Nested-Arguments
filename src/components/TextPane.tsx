@@ -9,6 +9,7 @@ export default function TextPane() {
     <div
       contentEditable
       suppressContentEditableWarning
+      id ="argument_pane"
       onInput={e => setText((e.target as HTMLDivElement).innerText)}
       style={{
         border: "1px solid #ccc",

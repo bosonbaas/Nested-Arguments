@@ -1,5 +1,4 @@
 // src/App.tsx
-//import React from "react";
 import MarkupParser from "./components/MarkupParser";
 import FilePanel from "./components/FilePanel";
 import GraphCanvas from "./components/GraphCanvas";
@@ -11,13 +10,14 @@ export default function App() {
   const traceDeps = useStore(state => state.traceDependenciesFrom);
   const nodes = useStore(state => state.nodes);
   const edges = useStore(state => state.edges);
+  const text = useStore(state => state.text);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
       <div style={{ flex: 1, padding: "1rem", borderRight: "1px solid #ccc" }}>
         <h2>Argument Text</h2>
-        <MarkupControls />
         <MarkupParser />
+        <MarkupControls />
         <hr style={{ margin: "1rem 0" }} />
         <button onClick={toggleView}>🎯 Toggle Dependency Highlights</button>
         <br />
@@ -29,7 +29,7 @@ export default function App() {
         >
           🔍 Trace Dependencies of Last Claim
         </button>
-				<button onClick={() => console.log("Graph debug:", [useStore.getState().nodes, useStore.getState().edges])}>
+				<button onClick={() => console.log("Graph debug:", [nodes, edges, text])}>
 				  🧪 Print Graph State
 				</button>
 

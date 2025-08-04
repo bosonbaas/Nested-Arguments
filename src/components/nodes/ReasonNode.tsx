@@ -32,7 +32,7 @@ export default function ReasonNode({ id, data, selected } : any) {
           key={role}
           type="target"
           position={Position.Top}
-          id={role}
+          id={"reason-in-" + role}
           title={role}
           style={{
             pointerEvents: "auto",
@@ -62,7 +62,7 @@ export default function ReasonNode({ id, data, selected } : any) {
           key={role}
           type="source"
           position={Position.Bottom}
-          id={role}
+          id={"reason-out-" + role}
           title={role}
           style={{
             pointerEvents: "auto",

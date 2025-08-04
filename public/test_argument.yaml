@@ -1,7 +1,7 @@
-label: >
-  Suppose that <claim id="c1">x is even</claim>. Then <claim id="c2">there exists some integer k</claim> such 
-  that <claim id="c3">x = 2k</claim> by <reason id="r1">the definition of even</reason>. Note that <claim id="c3">2x = 2(2k)</claim>. 
-  Since <claim id="c4">2k is an integer</claim>, <claim id="c5">2x must be even</claim>.
+text: >
+  Suppose that <claim  id="c1">x is even</claim>. Then <claim id="c2">there exists some integer k</claim> such 
+  that <claim id="c3">x = 2k</claim> by <reason id="r1">the definition of even</reason>. Note that <claim id="c4">2x = 2(2k)</claim>. 
+  Since <claim id="c5">2k is an integer</claim>, <claim id="c6">2x must be even</claim>.
 
 claims:
   - id: c1

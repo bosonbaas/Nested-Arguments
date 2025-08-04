@@ -1,13 +1,12 @@
 // src/components/MarkupControls.tsx
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useStore } from "../lib/stateStore";
-
-let claimCounter = 1;
-let reasonCounter = 1;
 
 export default function MarkupControls() {
   const text = useStore(state => state.text);
   const setText = useStore(state => state.setText);
+  const addNode = useStore(state => state.addNode);
+  const id_ind = useStore(state => state.id_ind)
   const [hasSelection, setHasSelection] = useState(false);
 
   useEffect(() => {
@@ -19,10 +18,19 @@ export default function MarkupControls() {
     return () => document.removeEventListener("selectionchange", check);
   }, []);
 
-  const wrapSelection = (tag: "claim" | "reason") => {
-    const id = tag === "claim" ? `c${claimCounter++}` : `r${reasonCounter++}`;
+  const addSelection = (tag: "claim" | "reason") => {
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0 || !sel.toString().trim()) return;
+    const [id, range] = wrapSelection(sel, tag)
+    addNode(range, tag, id)
+  }
+
+  // Converts <claim id="c1">text</claim> into styled <span> for editing
+  const wrapSelection = (sel : any, tag: "claim" | "reason") => {
+    
+    const id = tag === "claim" ? `c${id_ind}` : `r${id_ind}`;
+
+    //sel.rangeCount > 1 could enable people to include multiple pieces in the same claim/reason
 
     const range = sel.getRangeAt(0);
     const wrapper = document.createElement(tag);
@@ -32,12 +40,15 @@ export default function MarkupControls() {
     range.deleteContents();
     range.insertNode(wrapper);
 
-    const editable = document.querySelector("[contenteditable]");
-    if (editable) {
-      const html = editable.innerHTML;
+    // inserts a "claim" or "reason" span
+
+    const panel = document.getElementById("argument_pane");
+    if (panel) {
+      const html = panel.innerHTML;
       const tagged = spanToTag(html);
       setText(tagged);
     }
+    return [id, range.toString()];
   };
 
   const spanToTag = (html: string): string => {
@@ -56,8 +67,8 @@ export default function MarkupControls() {
 
   return hasSelection ? (
     <div style={{ marginBottom: "0.5rem" }}>
-      <button onClick={() => wrapSelection("claim")}>➕ Add Claim</button>{" "}
-      <button onClick={() => wrapSelection("reason")}>➕ Add Reason</button>
+      <button onClick={() => addSelection("claim")}>➕ Add Claim</button>{" "}
+      <button onClick={() => addSelection("reason")}>➕ Add Reason</button>
     </div>
   ) : null;
 }
