@@ -88,7 +88,7 @@ export default function FilePanel() {
           const cur_id = Number(n.id.slice(1));
           return isNaN(cur_id) ? 0 : cur_id;
         }))) + 1
-        console.log(id_int)
+        
         setIdInd(id_int)
 
         setNodes(all_nodes)
