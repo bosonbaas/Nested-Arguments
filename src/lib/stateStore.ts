@@ -51,6 +51,14 @@ interface StoreState {
   text: string;
   dependencyView: boolean;
 
+  /* Maybe it would make more sense query these things as I go with handlers...
+   *  But I feel that it'll be more convenient to have these as state, rather 
+   *  than adding an hooks everywhere I need them. I'll handle updating these 
+   *  in GraphCanvas.
+   */ 
+  selectedNodes: Node[];
+  selectedEdges: Edge[];
+
   setIdInd: (ind: number) => void;
   setGraph: (nodes: Node[], edges: Edge[]) => void;
   setNodes: (nodes: Node[]) => void;
@@ -58,11 +66,19 @@ interface StoreState {
   setHighlights: (h: Highlight[]) => void;
   setText: (txt: string) => void;
 
+  setSelectedNodes: (nodes: Node[]) => void;
+  setSelectedEdges: (edges: Edge[]) => void;
+
+  // Update node data
+  addPort: (node: Node, port_type: "dependency" | "conclusion", port_id: string) => void;
+  remPort: (node: Node, port_type: "dependency" | "conclusion", port_id: string) => void;
+
   addNode: (text: string, node_type: "claim" | "reason", id: string) => void;
   addHighlight: (start: number, end: number, type: string) => void;
   toggleDependencyView: () => void;
   traceDependenciesFrom: (nodeId: string) => void;
 
+  // Update Listeners
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: Connection) => void;
@@ -78,12 +94,78 @@ export const useStore = create<StoreState>((set, get) => ({
   text: "",
   dependencyView: false,
 
+  selectedNodes: [],
+  selectedEdges: [],
+
   setIdInd: (ind) => set(() => ({id_ind: ind})),
   setGraph: (nodes, edges) => set(() => ({ nodes, edges })),
   setNodes: (nodes) => set(() => ({nodes})),
   setEdges: (edges) => set(() => ({edges})),
   setHighlights: h => set(() => ({ highlights: h })),
   setText: txt => set(() => ({ text: txt })),
+
+  setSelectedNodes: nodes => set(() => ({ selectedNodes: nodes })),
+  setSelectedEdges: edges => set(() => ({ selectedEdges: edges })),
+
+  addPort: (node, port_type, port_id) => set(state => ({
+    nodes: state.nodes.map(n => {
+      if(n.id == node.id){
+        if(port_type == "dependency"){
+          n.data.dependencies.map(d => d != port_id).every(Boolean) || (() => {throw "ID already in use"})();
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              dependencies: [...n.data.dependencies, port_id]
+            }
+          }
+        } else if(port_type == "conclusion"){
+          n.data.conclusions.map(d => d != port_id).every(Boolean) || (() => {throw "ID already in use"})();
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              conclusions: [...n.data.conclusions, port_id]
+            }
+          }
+        }
+      }
+      return n
+    })
+  })),
+
+  remPort: (node, port_type, port_id) => set(state => ({
+    nodes: state.nodes.map(n => {
+      if(n.id == node.id){
+        if(port_type == "dependency"){
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              dependencies: n.data.dependencies.filter(d => !(d == port_id))
+            }
+          }
+        } else if(port_type == "conclusion"){
+          return {
+            ...n,
+            data: {
+              ...n.data,
+              conclusions: n.data.conclusions.filter(d => !(d == port_id))
+            }
+          }
+        }
+      }
+      return n
+    }),
+    edges: state.edges.filter(e => {
+      if(port_type == "dependency"){
+        return !(e.target == node.id && e.targetHandle == "reason-in-" + port_id)
+      } else if(port_type == "conclusion"){
+        return !(e.source == node.id && e.sourceHandle == "reason-out-" + port_id)
+      }
+      return true
+    })
+  })),
 
   toggleDependencyView: () =>
     set(state => ({ dependencyView: !state.dependencyView })),

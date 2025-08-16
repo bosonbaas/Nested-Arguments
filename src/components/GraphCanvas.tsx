@@ -19,6 +19,8 @@ const nodeTypes = {
 const selector = (state : any) => ({
   nodes: state.nodes,
   edges: state.edges,
+  setSelectedNodes: state.setSelectedNodes,
+  setSelectedEdges: state.setSelectedEdges,
   onNodesChange: state.onNodesChange,
   onNodesDelete: state.onNodesDelete,
   onEdgesChange: state.onEdgesChange,
@@ -26,11 +28,18 @@ const selector = (state : any) => ({
 });
 
 export default function GraphCanvas() {
-  const { nodes, edges, onNodesChange, onNodesDelete, onEdgesChange, onConnect } = useStore(
+  const { nodes, edges,
+          setSelectedNodes, setSelectedEdges, 
+          onNodesChange, onNodesDelete, onEdgesChange, onConnect } = useStore(
     useShallow(selector),
   );
 
-  
+  const onSelectionChange = useCallback(({nodes, edges}:any) => {
+    setSelectedNodes(nodes);
+    setSelectedEdges(edges);
+  }, []);
+
+  // Validator for edge connections
   const isValidConnection = (connection: Connection) => {
     if(connection.sourceHandle && connection.targetHandle){
       const isdup = edges.find((edge: Edge) => 
@@ -52,6 +61,7 @@ export default function GraphCanvas() {
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}
         onNodesDelete={onNodesDelete}
+        onSelectionChange={onSelectionChange}
         onConnect={onConnect}
         isValidConnection={isValidConnection}
         fitView

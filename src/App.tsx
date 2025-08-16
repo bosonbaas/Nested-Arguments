@@ -3,6 +3,7 @@ import MarkupParser from "./components/MarkupParser";
 import FilePanel from "./components/FilePanel";
 import GraphCanvas from "./components/GraphCanvas";
 import MarkupControls from "./components/MarkupControls";
+import ReasonPanel from "./components/ReasonPanel";
 import { useStore } from "./lib/stateStore";
 
 export default function App() {
@@ -36,9 +37,12 @@ export default function App() {
         <FilePanel />
       </div>
 
-      <div style={{ flex: 2, padding: "1rem" }}>
+      <div style={{display: "flex", flex: 2, padding: "1rem" }}>
+        <div style = {{flex: 2, height: "100%"}}>
         <h2>Graph Canvas</h2>
         <GraphCanvas />
+        </div>
+        <ReasonPanel />
       </div>
     </div>
   );

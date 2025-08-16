@@ -1,6 +1,8 @@
 // src/components/nodes/ReasonNode.tsx
-import { Handle, Position, NodeResizer } from "reactflow";
+import {useEffect} from "react";
+import { Handle, Position, NodeResizer, useUpdateNodeInternals} from "reactflow";
 import { useStore } from "../../lib/stateStore";
+
 
 export default function ReasonNode({ id, data, selected } : any) {
   const updateGraph = useStore(s => s.updateGraph);
@@ -8,6 +10,11 @@ export default function ReasonNode({ id, data, selected } : any) {
   const outputKeys = data.conclusions || [];
   const inputSpacing = 100 / (inputKeys.length + 1);
   const outputSpacing = 100 / (outputKeys.length + 1);
+
+  const updateNodeInternals = useUpdateNodeInternals();
+  useEffect(()=>{
+    updateNodeInternals(id);
+  }, [data.dependencies, data.conclusions])
 
   return (
 		<div style={{ position: "relative", pointerEvents: "auto" }}>  

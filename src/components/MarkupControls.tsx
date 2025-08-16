@@ -12,6 +12,7 @@ export default function MarkupControls() {
   useEffect(() => {
     const check = () => {
       const sel = window.getSelection();
+      if(!sel) return;
       setHasSelection(sel && sel.toString().trim().length > 0);
     };
     document.addEventListener("selectionchange", check);
