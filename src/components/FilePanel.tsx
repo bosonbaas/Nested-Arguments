@@ -2,23 +2,11 @@
 import React, { useRef } from "react";
 import { useArgStore } from "../lib/stateStore";
 import { useShallow } from 'zustand/react/shallow';
-import type { Edge, Node, NodeType } from "../lib/stateStore";
+import type { StoreState, NodeType } from "../lib/stateStore";
 import Delta from "quill-delta";
 import YAML from "js-yaml";
+import { argumentsFromYAML } from "../lib/argumentUtils";
 import * as z from "zod";
-
-type IntermedNode = {
-  id: string,
-  label: string,
-  type: NodeType,
-  height: Number,
-  width: Number,
-  position: {x: Number, y: Number},
-  dependencyOrder: string[],
-  conclusionOrder: string[],
-  dependencies: {[key: string]: string | null},
-  conclusions: {[key: string]: string | null}
-}
 
 const ZodClaimAtRest = z.object({
   id: z.string(),
@@ -75,20 +63,38 @@ type HighlightAtRest = z.infer<typeof ZodHighlightAtRest>
 
 // Not infered from Zod because of the Delta type
 type ArgumentAtRest = {
+  id: string,
+  name: string,
   delta: Delta,
   claims: ClaimAtRest[],
   reasons: ReasonAtRest[],
   highlights: HighlightAtRest[]
 }
 
-const selector = (state: any) => ({
+type IntermedNode = {
+  id: string,
+  label: string,
+  type: NodeType,
+  height: Number,
+  width: Number,
+  position: {x: Number, y: Number},
+  dependencyOrder: string[],
+  conclusionOrder: string[],
+  dependencies: {[key: string]: string | null},
+  conclusions: {[key: string]: string | null}
+}
+
+
+
+const selector = (state: StoreState) => ({
   highlights: state.highlights,
-  text: state.text,
-  setIdInd: state.setIdInd,
   setNodes: state.setNodes,
   setEdges: state.setEdges,
-  addHighlight: state.addHighlight,
-  setText: state.setText,
+  setHighlights: state.setHighlights,
+  setName: state.setName,
+  setArgumentID: state.setArgumentID,
+  setArgumentCache: state.setArgumentCache,
+  loadArgument: state.loadArgument
 });
 
 export default function FilePanel() {
@@ -96,7 +102,7 @@ export default function FilePanel() {
   const argumentEditor = useArgStore(state => state.argumentEditor);
 
   // useShallow may not make sense here
-  const { highlights, text, setNodes, setEdges, addHighlight, setText } = useArgStore(
+  const { highlights, setNodes, setEdges, setHighlights, setName, setArgumentID, setArgumentCache, loadArgument} = useArgStore(
     useShallow(selector),
   );
 
@@ -109,85 +115,13 @@ export default function FilePanel() {
       try {
         const yamlText = reader.result as string;
         const rawData = YAML.load(yamlText) as any;
-        const parseResult = ZodArgumentAtRest.safeParse(rawData)
-        if(!parseResult.success){
-          alert("Zod parse error: " + parseResult.error.message);
-        }
-        const data = parseResult.data as ArgumentAtRest
-        const edges: Edge[] = [];
-        let reasons: Node[] = [];
-        let claims: Node[] = [];
-        let edge_counter = 0;
-        reasons = data.reasons.map((n) => {
-          const dependencies = n.dependencies.map(([k,_])=>k);
-          const conclusions = n.conclusions.map(([k,_])=>k);
-          n.dependencies.forEach(([k ,v] : [string | null, string | null]) => {
-            if(!v){
-              return;
-            }
-            edges.push({
-              id: `edge-${++edge_counter}`,
-              source: v,
-              sourceHandle: "claim-out",
-              target: n.id,
-              targetHandle: `reason-in-${k}`
-            })
-          });
-          n.conclusions.forEach(([k,v] : [string | null, string | null]) => {
-            if(!v){
-              return;
-            }
-            edges.push({
-              id: `edge-${++edge_counter}`,
-              target: v,
-              targetHandle: "claim-in",
-              source: n.id,
-              sourceHandle: `reason-out-${k}`
-            })
-          });
-          return {
-            id: n.id,
-            type: "reason",
-            style:{
-              height: n.height,
-              width: n.width
-            },
-            height: n.height,
-            width: n.width,
-            position: n.position,
-            data: {
-              label: n.label,
-              dependencies: dependencies,
-              conclusions: conclusions,
-            },
-          } as Node;
-        })
-        
-        claims = data.claims.map((c) => ({
-          id: c.id,
-          type: "claim",
-          style:{
-            height: c.height,
-            width: c.width
-          },
-          position: c.position,
-          data: {
-            label: c.label,
-            dependencies: [] as string[],
-            conclusions: [] as string[],
-          }
-        } as Node))
 
-        console.log(claims)
+        const newArgs = argumentsFromYAML(rawData);
 
-        argumentEditor?.setContents(data.delta);
+        //TODO: Add logic for error catching
 
-        setNodes([...reasons, ...claims]);
-        setEdges(edges);
-
-        data.highlights.forEach((hl) => {
-          addHighlight(hl.type, hl.node_id, hl.id)
-        })
+        setArgumentCache(new Map(newArgs.arguments.map(a => ([a.id, a]))));
+        loadArgument(newArgs.default_argument)
       } catch (err) {
         alert("YAML import error: " + err);
       }

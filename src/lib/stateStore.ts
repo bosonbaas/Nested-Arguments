@@ -50,19 +50,20 @@ export type Argument = {
   highlights: Highlight[];
   delta: Delta;
   name: string;
+  id: string
 }
 
-interface StoreState {
+export interface StoreState {
 
   // Contains any arguments contained in the imported file, as well as any
   // arguments previously loaded from online sources.
-  argumentCache: {[key: string]: Argument};
+  argumentCache: Map<string, Argument>;
   argumentID: string,
 
   nodes: Node[];
   edges: Edge[];
   highlights: Highlight[];
-  text: string;
+  name: string;
   argumentEditor:Quill | null;
 
 //  dependencyView: boolean;
@@ -79,7 +80,9 @@ interface StoreState {
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
   setHighlights: (h: Highlight[]) => void;
-  setText: (txt: string) => void;
+  setName: (name: string) => void;
+  setArgumentID: (name: string) => void;
+  setArgumentCache: (args: Map<string, Argument>) => void;
 
   setSelectedNodes: (nodes: Node[]) => void;
   setSelectedEdges: (edges: Edge[]) => void;
@@ -111,17 +114,19 @@ interface StoreState {
   onNodesDelete: (deleted: any) => void;
 
   // Update current active argument
-
+  switchArgument: (new_arg: string) => boolean;
+  loadArgument: (new_arg: string) => boolean;
+  saveArgument: () => void;
 }
 
 export const useArgStore = create<StoreState>((set, get) => ({
-  argumentCache: {},
+  argumentCache: new Map(),
   argumentID: "",
 
   nodes: [],
   edges: [],
   highlights: [],
-  text: "",
+  name: "",
   importedText: "",
   argumentEditor: null,
 //  dependencyView: false,
@@ -133,7 +138,9 @@ export const useArgStore = create<StoreState>((set, get) => ({
   setNodes: (nodes) => set(() => ({nodes})),
   setEdges: (edges) => set(() => ({edges})),
   setHighlights: h => set(() => ({ highlights: h })),
-  setText: txt => set(() => ({ text: txt })),
+  setName: name => set(() => ({ name })),
+  setArgumentID: argumentID => set(() => ({ argumentID })),
+  setArgumentCache: argumentCache => set(() => ({ argumentCache })),
 
   setSelectedNodes: nodes => set(() => ({ selectedNodes: nodes })),
   setSelectedEdges: edges => set(() => ({ selectedEdges: edges })),
@@ -395,25 +402,55 @@ export const useArgStore = create<StoreState>((set, get) => ({
    * Unloads current argument (saving current state in cache), and then loads
    * the desired argument.
    */
-  switchArgument: () => {
-
+  switchArgument: (arg_id) => {
+    get().saveArgument()
+    return get().loadArgument(arg_id)
   },
 
   /**
    * Loads argument from argument stache, overwriting the current argument data
    */
-  loadArgument: () => {
-
+  loadArgument: (arg_id) => {
+    if(get().argumentCache.has(arg_id)){
+      set((state) => {
+        const new_arg = state.argumentCache.get(arg_id)
+        if(state.argumentEditor){
+          state.argumentEditor.setContents(new_arg?.delta)
+        }
+        return {
+          argumentID: arg_id,
+          nodes: new_arg?.nodes,
+          edges: new_arg?.edges,
+          highlights: new_arg?.highlights
+        }
+      })
+      return true;
+    } else {
+      return false;
+    }
   },
 
   /**
    * Saves the current argument state into the cache so it can be loaded later.
    */
   saveArgument: () => {
-    const argumentCache = useArgStore((state) => state.argumentCache);
-    const setNodes = useArgStore((state) => state.setNodes);
-    const setEdges = useArgStore((state) => state.setEdges);
-    const setHighlights = useArgStore((state) => state.setEdges);
-    
+    if(get().argumentID === ""){
+      console.log("ERROR: No argument currently loaded.")
+      return;
+    }
+    set((state) => {
+      const curDelta = state.argumentEditor ? state.argumentEditor.getContents() : {} as Delta;
+      const newCache = new Map(state.argumentCache).set(state.argumentID, {
+        nodes: state.nodes,
+        edges: state.edges,
+        highlights: state.highlights,
+        delta: curDelta,
+        name: state.name,
+        id: state.argumentID
+      })
+      return {
+        argumentCache: newCache
+      }
+    })
   }
 }));
