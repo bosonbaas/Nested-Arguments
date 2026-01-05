@@ -1,17 +1,28 @@
 // src/lib/stateStore.ts
 import { create } from "zustand";
-import { applyNodeChanges, applyEdgeChanges, addEdge} from 'reactflow';
+import { applyNodeChanges, applyEdgeChanges} from 'reactflow';
 import type {Connection} from 'reactflow'
+import { customAlphabet } from "nanoid"
+import type Quill from "quill";
+import type Delta from "quill-delta";
+
+export const customNanoid = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ")
+
+export type NodeType = "claim" | "reason" | "comment" | "rebuttal"
 
 export type Node = {
   // This ID must be unique. Text is used to give a human-readable string
   id: string;
-  type: "claim" | "reason";
+  type: NodeType;
   position: { x: number; y: number };
   width: number;
   height: number;
+  initialWidth?: number;
+  initialHeight?: number;
+  style?: any;
   // Dependencies describe the input ports and their ids
   data: {
+    hover: boolean;
     label: string;
     dependencies: string[];
     conclusions: string[];
@@ -28,28 +39,33 @@ export type Edge = {
 
 export type Highlight = {
   id: string;
-  startOffset: number;
-  endOffset: number;
-  type: string;//"claim" | "reason" | "annotation" | "dependency";
-  refId?: string;
-  color?: string;
+  node_id: string;
+  hover: boolean;
+  type: NodeType;
 };
 
-function deleteHighlight(html: string, id: string) : string {
-  const div = document.createElement("div");
-  div.innerHTML = html;
-  let rem_node = div.querySelector("#" + id)
-  rem_node?.replaceWith(rem_node.innerHTML)
-  return div.innerHTML;
+export type Argument = {
+  nodes: Node[];
+  edges: Edge[];
+  highlights: Highlight[];
+  delta: Delta;
+  name: string;
 }
 
 interface StoreState {
-  id_ind: number;
+
+  // Contains any arguments contained in the imported file, as well as any
+  // arguments previously loaded from online sources.
+  argumentCache: {[key: string]: Argument};
+  argumentID: string,
+
   nodes: Node[];
   edges: Edge[];
   highlights: Highlight[];
   text: string;
-  dependencyView: boolean;
+  argumentEditor:Quill | null;
+
+//  dependencyView: boolean;
 
   /* Maybe it would make more sense query these things as I go with handlers...
    *  But I feel that it'll be more convenient to have these as state, rather 
@@ -59,7 +75,6 @@ interface StoreState {
   selectedNodes: Node[];
   selectedEdges: Edge[];
 
-  setIdInd: (ind: number) => void;
   setGraph: (nodes: Node[], edges: Edge[]) => void;
   setNodes: (nodes: Node[]) => void;
   setEdges: (edges: Edge[]) => void;
@@ -72,32 +87,48 @@ interface StoreState {
   // Update node data
   addPort: (node: Node, port_type: "dependency" | "conclusion", port_id: string) => void;
   remPort: (node: Node, port_type: "dependency" | "conclusion", port_id: string) => void;
+  setNodeLabel: (node: Node, label:string) => void
+  setNodeSize: (node_id: string, width: number, height: number) => void
 
-  addNode: (text: string, node_type: "claim" | "reason", id: string) => void;
-  addHighlight: (start: number, end: number, type: string) => void;
-  toggleDependencyView: () => void;
-  traceDependenciesFrom: (nodeId: string) => void;
+  addNode: (text: string, node_type: NodeType) => string;
+  addHighlightFromNode: (node:Node) => string;
+  addHighlight: (type:NodeType, node_id:string, highlight_id?:string) => string;
+  remHighlight: (id:string) => void;
+  remAllNodeHighlights: (node_id:string) => void;
+//  toggleDependencyView: () => void;
+//  traceDependenciesFrom: (nodeId: string) => void;
+
+  // Update highlight state
+  setHover: (node_id: string, hover: boolean) => void;
+
+  // Update Quill
+  setArgumentEditor: (argumentEditor: Quill) => void;
 
   // Update Listeners
   onNodesChange: (changes: any) => void;
   onEdgesChange: (changes: any) => void;
   onConnect: (connection: Connection) => void;
   onNodesDelete: (deleted: any) => void;
-  updateGraph: (mutator: (draft: Node[]) => void) => void;
+
+  // Update current active argument
+
 }
 
-export const useStore = create<StoreState>((set, get) => ({
-  id_ind: 0,
+export const useArgStore = create<StoreState>((set, get) => ({
+  argumentCache: {},
+  argumentID: "",
+
   nodes: [],
   edges: [],
   highlights: [],
   text: "",
-  dependencyView: false,
+  importedText: "",
+  argumentEditor: null,
+//  dependencyView: false,
 
   selectedNodes: [],
   selectedEdges: [],
 
-  setIdInd: (ind) => set(() => ({id_ind: ind})),
   setGraph: (nodes, edges) => set(() => ({ nodes, edges })),
   setNodes: (nodes) => set(() => ({nodes})),
   setEdges: (edges) => set(() => ({edges})),
@@ -167,42 +198,136 @@ export const useStore = create<StoreState>((set, get) => ({
     })
   })),
 
-  toggleDependencyView: () =>
-    set(state => ({ dependencyView: !state.dependencyView })),
+  setNodeLabel: (node, label) => set( state => ({
+    nodes: state.nodes.map(n => {
+      if(n.id == node.id){
+        return {
+          ...n,
+          data: {
+            ...n.data,
+            label: label
+          }
+        }
+      }
+      return n
+    })})
+  ),
 
-  addNode: (label, node_type) =>
+  setNodeSize: (node_id, width, height) => set( state => ({
+    nodes: state.nodes.map(n => {
+      if(n.id == node_id){
+        return {
+          ...n,
+          width: width,
+          height: height
+        }
+      }
+      return n
+    })})
+  ),
+
+//  toggleDependencyView: () =>
+//    set(state => ({ dependencyView: !state.dependencyView })),
+
+  addNode: (label, node_type) => {
+    const id = `${node_type[0]}${customNanoid()}`
     set(state => ({
-      id_ind: state.id_ind + 1,
       nodes: [
         ...state.nodes,
         {
-          id: `${node_type[0]}${state.id_ind}`,
+          id,
           type: node_type,
           width: 100,
           height: 50,
           position: { x: 100, y: 100 + state.nodes.length * 40 },
           data: {
+            hover: false,
             label,
             dependencies: [],
             conclusions: []
           }
         }
       ]
-    })),
+    })) 
+    return id; 
+  },
 
-  addHighlight: (start, end, type) =>
+  addHighlightFromNode: (node) =>{
+    const id = customNanoid();
     set(state => ({
       highlights: [
         ...state.highlights,
         {
-          id: `hl-${Date.now()}`,
-          startOffset: start,
-          endOffset: end,
+          id,
+          node_id: node.id,
+          hover: false,
+          type: node.type
+        }
+      ]
+    }))
+    return id
+  },
+
+  addHighlight: (type, node_id, highlight_id=undefined) => {
+    const id = highlight_id ? highlight_id : customNanoid()
+    set(state => ({
+      highlights: [
+        ...state.highlights,
+        {
+          id,
+          node_id,
+          hover: false,
           type
         }
       ]
+    }))
+    return id
+  },
+
+  remHighlight: (id) =>
+    set(state => ({
+      highlights: state.highlights.filter((hl) => {
+        hl.id !== id
+      })
     })),
 
+  // Note that this just manages state, and does not manage the actual
+  // highlight in Quill.js
+  remAllNodeHighlights: (node_id) =>
+    set(state => ({
+      highlights: state.highlights.filter((hl) => {
+        hl.node_id !== node_id
+      })
+    })),
+
+  setHover: (node_id, hover) =>
+    set(state => {
+      const highlights = state.highlights.map((el) => {
+        if (el.node_id === node_id) {
+          return { ...el, hover };
+        } else {
+          return el;
+        }
+      }) 
+      const nodes = state.nodes.map((el) => {
+        if (el.id === node_id) {
+          return { 
+            ...el, 
+            data:{
+              ...el.data,
+              hover
+            }
+          };
+        } else {
+          return el;
+        }
+      })
+      return { highlights, nodes }
+    }),
+
+  setArgumentEditor: (argumentEditor) =>
+    set(state => ({argumentEditor})),
+/*
   traceDependenciesFrom: nodeId => {
     const visited = new Set<string>();
     const highlights: Highlight[] = [];
@@ -236,14 +361,15 @@ export const useStore = create<StoreState>((set, get) => ({
     dfs(nodeId, 0, baseHue);
     set(() => ({ highlights }));
   },
-
+*/
   onNodesChange: (changes) => {
-    set({nodes: applyNodeChanges(changes, get().nodes)})
-    console.log("nodes changed")
+    set({
+      nodes: applyNodeChanges(changes, get().nodes) as Node[]
+    });
   },
   onEdgesChange: (changes) => {
     set({
-      edges: applyEdgeChanges(changes, get().edges),
+      edges: applyEdgeChanges(changes, get().edges as any) as Edge[],
     });
   },
   onConnect: (connection: Connection) => {
@@ -258,17 +384,36 @@ export const useStore = create<StoreState>((set, get) => ({
   onNodesDelete: (deleted) => {
     set((state) => {
       const del_ids = deleted.map((n: Node) => n.id)
-      const text = deleted.reduce((acc: string, cur: Node) => deleteHighlight(acc, cur.id), state.text)
       const nodes = state.nodes.filter((n:Node) => !del_ids.includes(n.id))
       const edges = state.edges.filter((e:Edge) => !(del_ids.includes(e.target) || del_ids.includes(e.source)))
-      return {nodes, edges, text}
+      const highlights = state.highlights.filter((hl:Highlight) => !(del_ids.includes(hl.node_id)))
+      return {nodes, edges, highlights}
     })
   },
 
-  updateGraph: (mutator) => {
-    const current = [...get().graph]; // clone defensively
-    mutator(current);
-    set({ graph: current });
-  }
+  /**
+   * Unloads current argument (saving current state in cache), and then loads
+   * the desired argument.
+   */
+  switchArgument: () => {
 
+  },
+
+  /**
+   * Loads argument from argument stache, overwriting the current argument data
+   */
+  loadArgument: () => {
+
+  },
+
+  /**
+   * Saves the current argument state into the cache so it can be loaded later.
+   */
+  saveArgument: () => {
+    const argumentCache = useArgStore((state) => state.argumentCache);
+    const setNodes = useArgStore((state) => state.setNodes);
+    const setEdges = useArgStore((state) => state.setEdges);
+    const setHighlights = useArgStore((state) => state.setEdges);
+    
+  }
 }));

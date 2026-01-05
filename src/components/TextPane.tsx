@@ -1,9 +1,9 @@
 import React from "react";
-import { useStore } from "../lib/stateStore";
+import { useArgStore } from "../lib/stateStore";
 
 export default function TextPane() {
-  const text = useStore(state => state.text);
-  const setText = useStore(state => state.setText);
+  const text = useArgStore(state => state.text);
+  const setText = useArgStore(state => state.setText);
 
   return (
     <div

@@ -1,0 +1,73 @@
+.quill-editor {
+  background: white;
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  min-height: 300px;
+  margin-bottom: 2rem;
+}
+
+/* Quill Toolbar Styles */
+.ql-toolbar {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px 4px 0 0;
+  padding: 0.5rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.ql-toolbar.ql-snow {
+  background: #f9f9f9;
+}
+
+.ql-toolbar button {
+  border: 1px solid #e0e0e0;
+  border-radius: 4px;
+  cursor: pointer;
+  margin: 0.25rem;
+  padding: 0.4rem 0.6rem;
+  transition: all 0.2s ease;
+  background: white;
+  font-size: 16px;
+  width: auto;
+  height: auto;
+  line-height: 1;
+}
+
+.ql-toolbar button:hover {
+  background: #f0f0f0;
+  border-color: #999;
+}
+
+.ql-toolbar button.ql-active {
+  background: #e3f2fd;
+  border-color: #2196f3;
+}
+
+.ql-toolbar button.ql-highlight-btn {
+  font-size: 18px;
+  padding: 0.3rem 0.6rem;
+}
+
+/* Quill Editor Styles */
+.ql-container {
+  border-radius: 0 0 4px 4px;
+  font: 16px sans-serif;
+}
+
+.ql-editor {
+  min-height: 250px;
+  padding: 1.5rem;
+}
+
+.ql-editor.ql-blank::before {
+  color: #ccc;
+}
+
+.highlight {
+  background-image: linear-gradient(rgba(100, 100, 100, 0.466));
+  cursor: pointer;
+  padding: 2px 0px;
+  border-radius: 2px;
+  transition: background-color 0.2s;
+}

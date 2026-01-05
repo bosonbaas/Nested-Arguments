@@ -1,12 +1,14 @@
 // src/components/nodes/ClaimNode.tsx
 import { Handle, Position, NodeResizer } from "reactflow";
-import { useStore } from "../../lib/stateStore";
 
-export default function ClaimNode({ id, data, selected } : any) {
-  const updateGraph = useStore(s => s.updateGraph);
-
+export default function ClaimNode({ id, data, selected} : any) {
   return (
-    <div style={{ position: "relative", pointerEvents: "none" }}>
+    <div 
+      style={{ position: "relative", 
+        pointerEvents: "none",
+        height: "100%",
+        width: "100%"}}
+    >
       <Handle
         type="target"
         position={Position.Top}
@@ -21,31 +23,24 @@ export default function ClaimNode({ id, data, selected } : any) {
 
       <div
         style={{
-          border: "2px solid #52c41a",
-          backgroundColor: "#f6ffed",
+          border: data.hover ? "2px solid #429916ff": "2px solid #52c41a",
+          backgroundColor: data.hover ? "#b9c0b2ff" : "#f6ffed",
           borderRadius: 6,
           fontWeight: "bold",
           padding: 10,
           pointerEvents: "auto",
-          overflow: "hidden"
+          overflow: "hidden",
+          height: "100%",
+          width: "100%"
         }}
       >
         {data.label}
 
         <NodeResizer
-          color="#52c41a"
+          color= {data.hover ? "#53c41ab2" : "#52c41a"}
           isVisible={selected}
-          minWidth={100}
-          minHeight={60}
-          onResize={(e, { width, height }) => {
-            updateGraph(draft => {
-              const node = draft.find(n => n.id === id);
-              if (node) {
-                node.width = width;
-                node.height = height;
-              }
-            });
-          }}
+          minWidth={30}
+          minHeight={30}
         />
       </div>
 

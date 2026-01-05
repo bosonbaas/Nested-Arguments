@@ -1,38 +1,35 @@
 // src/App.tsx
-import MarkupParser from "./components/MarkupParser";
 import FilePanel from "./components/FilePanel";
 import GraphCanvas from "./components/GraphCanvas";
-import MarkupControls from "./components/MarkupControls";
 import ReasonPanel from "./components/ReasonPanel";
-import { useStore } from "./lib/stateStore";
+import EditorContainer from "./components/EditorContainer"
+// TODO: Add Mantine styling (use it for re-sizing of divs)
+// import { MantineProvider } from '@mantine/core';
+import { useArgStore } from "./lib/stateStore";
 
 export default function App() {
-  const toggleView = useStore(state => state.toggleDependencyView);
-  const traceDeps = useStore(state => state.traceDependenciesFrom);
-  const nodes = useStore(state => state.nodes);
-  const edges = useStore(state => state.edges);
-  const text = useStore(state => state.text);
+
+  // State tracked for state of debug. 
+  const nodes = useArgStore(state => state.nodes);
+  const edges = useArgStore(state => state.edges);
+  const text = useArgStore(state => state.text);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
       <div style={{ flex: 1, padding: "1rem", borderRight: "1px solid #ccc" }}>
         <h2>Argument Text</h2>
-        <MarkupParser />
-        <MarkupControls />
+        <EditorContainer />
         <hr style={{ margin: "1rem 0" }} />
-        <button onClick={toggleView}>🎯 Toggle Dependency Highlights</button>
+        <button onClick={() => alert("Toggle dependencies")}>🎯 Toggle Dependency Highlights</button>
         <br />
         <button
-          onClick={() => {
-            const last = [...nodes].reverse().find(n => n.type === "claim");
-            if (last) traceDeps(last.id);
-          }}
+          onClick={() => alert("Trace dependencies")}
         >
           🔍 Trace Dependencies of Last Claim
         </button>
-				<button onClick={() => console.log("Graph debug:", [nodes, edges, text])}>
-				  🧪 Print Graph State
-				</button>
+        <button onClick={() => console.log("Graph debug:", [nodes, edges, text])}>
+          🧪 Print Graph State
+        </button>
 
         <FilePanel />
       </div>
@@ -42,8 +39,8 @@ export default function App() {
         <h2>Graph Canvas</h2>
         <GraphCanvas />
         </div>
-        <ReasonPanel />
       </div>
+      <ReasonPanel />
     </div>
   );
 }

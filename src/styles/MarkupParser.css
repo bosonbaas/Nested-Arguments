@@ -1,0 +1,23 @@
+span.highlight.claim {
+  background-color: #f6ffed;
+  border-bottom: 2px solid #52c41a;
+  font-weight: bold;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+span.highlight.claim:hover {
+  background-color: #52c41a;
+}
+
+span.highlight.reason {
+  background-color: #e6f7ff;
+  border-bottom: 2px dashed #1890ff;
+  font-style: italic;
+  padding: 0 2px;
+  border-radius: 3px;
+}
+
+span.highlight.reason:hover {
+  background-color: #1890ff;
+}
