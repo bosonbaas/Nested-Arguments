@@ -6,11 +6,13 @@ import ReactFlow, {
   MiniMap
 } from "reactflow";
 import { useShallow } from 'zustand/react/shallow';
-import "reactflow/dist/style.css";
-import { useStore } from "../lib/stateStore";
+import { useArgStore } from "../lib/stateStore";
 import ClaimNode from "./nodes/ClaimNode";
 import ReasonNode from "./nodes/ReasonNode";
 import type {Connection, Edge} from "reactflow";
+
+// @ts-ignore Ignore type-checking for styling
+import "reactflow/dist/style.css";
 
 
 const nodeTypes = {
@@ -24,13 +26,14 @@ const selector = (state : any) => ({
   onNodesChange: state.onNodesChange,
   onNodesDelete: state.onNodesDelete,
   onEdgesChange: state.onEdgesChange,
+  setHover: state.setHover,
   onConnect: state.onConnect,
 });
 
 export default function GraphCanvas() {
   const { nodes, edges,
           setSelectedNodes, setSelectedEdges, 
-          onNodesChange, onNodesDelete, onEdgesChange, onConnect } = useStore(
+          onNodesChange, onNodesDelete, onEdgesChange, setHover, onConnect } = useArgStore(
     useShallow(selector),
   );
 
@@ -57,6 +60,12 @@ export default function GraphCanvas() {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodeMouseEnter={
+          (event, node) => setHover(node.id, true)
+        }
+        onNodeMouseLeave={
+          (event, node) => setHover(node.id, false)
+        }
         nodeTypes={nodeTypes}
         onNodesChange={onNodesChange}
         onEdgesChange={onEdgesChange}

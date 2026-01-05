@@ -1,11 +1,9 @@
 // src/components/nodes/ReasonNode.tsx
 import {useEffect} from "react";
 import { Handle, Position, NodeResizer, useUpdateNodeInternals} from "reactflow";
-import { useStore } from "../../lib/stateStore";
 
 
-export default function ReasonNode({ id, data, selected } : any) {
-  const updateGraph = useStore(s => s.updateGraph);
+export default function ReasonNode({ id, data, selected} : any) {
   const inputKeys = data.dependencies || [];
   const outputKeys = data.conclusions || [];
   const inputSpacing = 100 / (inputKeys.length + 1);
@@ -17,22 +15,18 @@ export default function ReasonNode({ id, data, selected } : any) {
   }, [data.dependencies, data.conclusions])
 
   return (
-		<div style={{ position: "relative", pointerEvents: "auto" }}>  
+		<div 
+      style={{ 
+        position: "relative", 
+        pointerEvents: "auto",
+        height: "100%",
+        width: "100%" }}
+    >  
       <NodeResizer
         color="#1890ff"
         isVisible={selected}
-        minWidth={140}
-        minHeight={60} 
-        onResize={(e, { width, height }) => {
-          console.log(data)
-          updateGraph(draft => {
-            const node = draft.find(n => n.id === id);
-            if (node) {
-              node.width = width;
-              node.height = height;
-            }
-          });
-        }}
+        minWidth={30}
+        minHeight={30}
       />
 			{inputKeys.map((role : string, i : number) => (
         <Handle
@@ -57,7 +51,9 @@ export default function ReasonNode({ id, data, selected } : any) {
           fontStyle: "italic",
           padding: 10,
           pointerEvents: "auto",
-          overflow: "hidden"
+          overflow: "hidden",
+          height: "100%",
+          width: "100%"
         }}
       >
         {data.label}

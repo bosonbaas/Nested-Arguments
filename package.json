@@ -2,12 +2,13 @@
   "name": "nested_arguments",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "index.html",
   "homepage": "https://bosonbaas.github.io/nested-arguments/",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
     "preview": "vite preview",
+    "typecheck": "tsc --noEmit",
     "test": "echo \"Error: no test specified\" && exit 1",
     "deploy": "gh-pages -d dist"
   },
@@ -15,17 +16,25 @@
   "author": "",
   "license": "GPL-3.0",
   "dependencies": {
+    "@mantine/core": "^8.2.7",
+    "@mantine/hooks": "^8.2.7",
     "js-yaml": "^4.1.0",
+    "katex": "^0.16.27",
+    "quill": "^2.0.3",
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "reactflow": "^11.11.4",
+    "underscore": "^1.13.7",
+    "zod": "^4.3.4",
     "zustand": "^5.0.6"
   },
   "devDependencies": {
+    "@types/js-yaml": "^4.0.9",
     "@types/react": "^19.1.8",
     "@types/react-dom": "^19.1.6",
     "@vitejs/plugin-react": "^4.6.0",
     "gh-pages": "^6.3.0",
+    "nanoid": "^5.1.6",
     "typescript": "^5.8.3",
     "vite": "^7.0.2"
   },
