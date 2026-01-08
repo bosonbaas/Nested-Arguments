@@ -1,0 +1,176 @@
+default_argument: x_squared_is_even
+arguments:
+  - name: The square of an even number is even
+    id: x_squared_is_even
+    delta:
+      ops:
+        - insert: "Suppose that "
+        - attributes:
+            highlight:
+              - claim_cRtAXR5hghXOsjPM3vQRIG
+          insert: x is even
+        - insert: ". Then "
+        - attributes:
+            highlight:
+              - claim_cvpe2sS4ojR6kgo6W5VNuk
+          insert: there exists some integer k
+        - insert: " such that "
+        - attributes:
+            highlight:
+              - claim_cALV3B8sJPcS7oy0Q9MmeI
+          insert:
+            formula: x=2k
+        - insert: " by "
+        - attributes:
+            highlight:
+              - reason_ryz7a3Vc4pccicYx6EO41F
+          insert: the definition of even
+        - insert: ". Note that "
+        - attributes:
+            highlight:
+              - claim_czu4M15JRPPx6Rr9Y3oyT5
+          insert:
+            formula: x^2=2(2k^2)
+        - insert: ". Since "
+        - attributes:
+            highlight:
+              - claim_c3sJIDhhf5qg1CNRZbKFND
+          insert: 2k^2 is an integer
+        - insert: ", "
+        - attributes:
+            highlight:
+              - claim_coG0o9bPYaXC03BqA6seKW
+          insert: x^2 must be even
+        - insert: |
+            .
+    claims:
+      - id: cRtAXR5hghXOsjPM3vQRIG
+        label: x is even
+        width: 92
+        height: 42
+        position:
+          x: 91
+          "y": 26.5
+      - id: cvpe2sS4ojR6kgo6W5VNuk
+        label: k is an integer
+        width: 132
+        height: 42
+        position:
+          x: 1
+          "y": 157.5
+      - id: cALV3B8sJPcS7oy0Q9MmeI
+        label: x = 2k
+        width: 69
+        height: 42
+        position:
+          x: 197.5
+          "y": 160
+      - id: czu4M15JRPPx6Rr9Y3oyT5
+        label: x^2 = 2(2k^2)
+        width: 130
+        height: 42
+        position:
+          x: 174.5
+          "y": 297
+      - id: c3sJIDhhf5qg1CNRZbKFND
+        label: 2k^2 is an integer
+        width: 159
+        height: 42
+        position:
+          x: -37
+          "y": 301.5
+      - id: coG0o9bPYaXC03BqA6seKW
+        label: x^2 must be even
+        width: 158
+        height: 42
+        position:
+          x: 78
+          "y": 440.5
+    reasons:
+      - id: ryz7a3Vc4pccicYx6EO41F
+        label: Definition of Even
+        position:
+          x: 53
+          "y": 92.5
+        width: 172
+        height: 42
+        dependencies:
+          - - x is even
+            - cRtAXR5hghXOsjPM3vQRIG
+        conclusions:
+          - - k is an integer
+            - cvpe2sS4ojR6kgo6W5VNuk
+          - - x = 2k
+            - cALV3B8sJPcS7oy0Q9MmeI
+      - id: rw3XPBeYDLVHMYQSZBJYBH
+        label: Integers are closed under multiplication
+        position:
+          x: -32.5
+          "y": 222
+        width: 168
+        height: 61
+        dependencies:
+          - - k is an integer
+            - cvpe2sS4ojR6kgo6W5VNuk
+        conclusions:
+          - - 2k^2 is an integer
+            - c3sJIDhhf5qg1CNRZbKFND
+      - id: rywr5SDNJASQZoXnFzV97K
+        label: Definition of Even
+        position:
+          x: 84.5
+          "y": 367
+        width: 154
+        height: 42
+        dependencies:
+          - - k is an integer
+            - c3sJIDhhf5qg1CNRZbKFND
+          - - x = 2k
+            - czu4M15JRPPx6Rr9Y3oyT5
+        conclusions:
+          - - x is even
+            - coG0o9bPYaXC03BqA6seKW
+      - id: rOdtd6Bdh2WIGlga7WSkTF
+        label: Squaring both sides preserves equality
+        position:
+          x: 157.5
+          "y": 219
+        width: 167
+        height: 58
+        dependencies:
+          - - x = 2k
+            - cALV3B8sJPcS7oy0Q9MmeI
+        conclusions:
+          - - x^2 = 2(2k^2)
+            - czu4M15JRPPx6Rr9Y3oyT5
+    highlights:
+      - id: gEeRhlfBlTezoda6at5Lr
+        node_id: cRtAXR5hghXOsjPM3vQRIG
+        type: claim
+      - id: U3Va9EwGioEKdIjVXiYhe
+        node_id: cvpe2sS4ojR6kgo6W5VNuk
+        type: claim
+      - id: SHxdtcyj0YSVlrUk3Z3oP
+        node_id: cALV3B8sJPcS7oy0Q9MmeI
+        type: claim
+      - id: f6xHn5lCI47ULVK0LBq1d
+        node_id: ryz7a3Vc4pccicYx6EO41F
+        type: reason
+      - id: cMD2JRXP44FJo20SehQ54
+        node_id: czu4M15JRPPx6Rr9Y3oyT5
+        type: claim
+      - id: 2lLYTR6Rf7soS50pw01Km
+        node_id: c3sJIDhhf5qg1CNRZbKFND
+        type: claim
+      - id: I8pb6MBRhF4FLNm28XO6f
+        node_id: coG0o9bPYaXC03BqA6seKW
+        type: claim
+      - id: hZ90EHTHQelsKdc3VyGdc
+        node_id: rw3XPBeYDLVHMYQSZBJYBH
+        type: reason
+      - id: h2CGDyHLvsTnYoNU1EDfy
+        node_id: rywr5SDNJASQZoXnFzV97K
+        type: reason
+      - id: wrrK5FzBWrvMjybwWFdg1
+        node_id: rOdtd6Bdh2WIGlga7WSkTF
+        type: reason
