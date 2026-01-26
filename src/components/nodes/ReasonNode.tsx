@@ -23,7 +23,7 @@ export default function ReasonNode({ id, data, selected} : any) {
         width: "100%" }}
     >  
       <NodeResizer
-        color="#1890ff"
+        color= {data.hover ? "#1275d1ff": "#1890ff"}
         isVisible={selected}
         minWidth={30}
         minHeight={30}
@@ -45,8 +45,8 @@ export default function ReasonNode({ id, data, selected} : any) {
 
       <div
         style={{
-          border: "2px dashed #1890ff",
-          backgroundColor: "#e6f7ff",
+          border: data.hover ? "2px dashed #1275d1ff": "2px dashed #1890ff",
+          backgroundColor: data.hover ? "#b9c7ceff" : "#e6f7ff",
           borderRadius: 12,
           fontStyle: "italic",
           padding: 10,

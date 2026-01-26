@@ -30,13 +30,12 @@ type EditorProps = {
 }
 
 // Editor is an uncontrolled React component
-export default function Editor({highlights, addHighlight, addNode, setHover, setArgumentEditor, defaultValue, ref}:EditorProps){
+export default function Editor({highlights, addHighlight, addNode, setHover, setArgumentEditor, ref}:EditorProps){
   
   // Why am I making these refs? This is carryover from
   // https://quilljs.com/playground/react
   const containerRef = useRef<HTMLDivElement>(null);
   const setHoverRef = useRef(setHover);
-  const defaultValueRef = useRef(defaultValue);
   const addHighlightRef = useRef(addHighlight);
   const addNodeRef = useRef(addNode);
   const setArgumentEditorRef = useRef(setArgumentEditor);
@@ -140,11 +139,6 @@ export default function Editor({highlights, addHighlight, addNode, setHover, set
     setArgumentEditorRef.current(quill);
     // @ts-ignore
     window.quill = quill;
-
-    // Set initial content with pre-highlighted text
-    if (defaultValueRef.current) {
-      quill.setContents(defaultValueRef.current);
-    }
 
     // Setup hover listeners. This only has to be run once
     // since the MutationObserver will handle adding new listeners

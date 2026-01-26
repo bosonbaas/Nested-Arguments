@@ -1,0 +1,132 @@
+delta:
+  ops:
+    - insert: 'Let '
+    - attributes:
+        highlight:
+          - claim_cCvdsxcK81a1PB2W30DKwH
+      insert:
+        formula: x = y
+    - insert: '. Then '
+    - attributes:
+        highlight:
+          - claim_cVVg1LWSGnM9Ze94Wn6tWm
+      insert:
+        formula: x\cdot x = y \cdot x
+    - insert: ' by the fact that '
+    - attributes:
+        highlight:
+          - reason_rcgWM2UgO1AujQikCq5SQc
+      insert: right-multiplication is well-defined
+    - insert: '. Then '
+    - attributes:
+        highlight:
+          - claim_cz5EKfJUn6uQHIRJtEx6wO
+      insert:
+        formula: x\cdot x = y \cdot y
+    - insert: ' by '
+    - attributes:
+        highlight:
+          - reason_r4BFU5unsrZ2xvjwtFJVYC
+      insert: substitution
+    - insert: ', so '
+    - attributes:
+        highlight:
+          - claim_cyUZmW5H5K9sPX34zoyiuT
+          - reason_rUisS8gDBmRy3JazlHUvBp
+      insert:
+        formula: x^2 = y^2
+    - insert: |2
+         .
+claims:
+  - id: cCvdsxcK81a1PB2W30DKwH
+    label: x = y
+    width: 60
+    height: 42
+    position:
+      x: 114.09348659003831
+      'y': 50.03218390804595
+  - id: cVVg1LWSGnM9Ze94Wn6tWm
+    label: x*x = y*x
+    width: 90
+    height: 42
+    position:
+      x: -54.38773946360146
+      'y': 209.18620689655168
+  - id: cz5EKfJUn6uQHIRJtEx6wO
+    label: x*x = y*y
+    width: 90
+    height: 42
+    position:
+      x: 96.15632183908053
+      'y': 351.96628352490427
+  - id: cyUZmW5H5K9sPX34zoyiuT
+    label: x^2 = y^2
+    width: 97
+    height: 42
+    position:
+      x: 94.23448275862069
+      'y': 485.77777777777777
+reasons:
+  - id: rcgWM2UgO1AujQikCq5SQc
+    label: right-multiplication is well-defined
+    position:
+      x: -128.69885057471265
+      'y': 132.5946360153257
+    width: 259
+    height: 42
+    dependencies:
+      - - x=y
+        - cCvdsxcK81a1PB2W30DKwH
+    conclusions:
+      - - x*x=y*y
+        - cVVg1LWSGnM9Ze94Wn6tWm
+  - id: r4BFU5unsrZ2xvjwtFJVYC
+    label: Algebraic Substitution
+    position:
+      x: 51.31340996168586
+      'y': 276.655938697318
+    width: 179
+    height: 42
+    dependencies:
+      - - f(x) = p(x)
+        - cVVg1LWSGnM9Ze94Wn6tWm
+      - - x=y
+        - cCvdsxcK81a1PB2W30DKwH
+    conclusions:
+      - - f(x) = p(y)
+        - cz5EKfJUn6uQHIRJtEx6wO
+  - id: rUisS8gDBmRy3JazlHUvBp
+    label: Algebraic Simplication
+    position:
+      x: 52.594636015325705
+      'y': 417.51417624521076
+    width: 181
+    height: 42
+    dependencies:
+      - - x*x = y*y
+        - cz5EKfJUn6uQHIRJtEx6wO
+    conclusions:
+      - - x^2 = y^2
+        - cyUZmW5H5K9sPX34zoyiuT
+highlights:
+  - id: 6OY0kNeX1CxmRfvbnFxEJ
+    node_id: cCvdsxcK81a1PB2W30DKwH
+    type: claim
+  - id: tXrgPyuqwixse33km80uC
+    node_id: cVVg1LWSGnM9Ze94Wn6tWm
+    type: claim
+  - id: xrUQMVRia3K2hcaKjKBcn
+    node_id: rcgWM2UgO1AujQikCq5SQc
+    type: reason
+  - id: dZr8CBKjstYwxEoSPOsPW
+    node_id: cz5EKfJUn6uQHIRJtEx6wO
+    type: claim
+  - id: U9THOND70N4zEpwSYUaGE
+    node_id: r4BFU5unsrZ2xvjwtFJVYC
+    type: reason
+  - id: 51q2S0rJqioUfifvPmHwO
+    node_id: cyUZmW5H5K9sPX34zoyiuT
+    type: claim
+  - id: LAu9ykj2ZZsvxOh1FMMp8
+    node_id: rUisS8gDBmRy3JazlHUvBp
+    type: reason

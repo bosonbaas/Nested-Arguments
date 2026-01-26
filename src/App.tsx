@@ -3,16 +3,36 @@ import FilePanel from "./components/FilePanel";
 import GraphCanvas from "./components/GraphCanvas";
 import ReasonPanel from "./components/ReasonPanel";
 import EditorContainer from "./components/EditorContainer"
-// TODO: Add Mantine styling (use it for re-sizing of divs)
-// import { MantineProvider } from '@mantine/core';
+import { useEffect } from "react";
+import YAML from "js-yaml";
+import { argumentsFromYAML } from "./lib/argumentUtils";
 import { useArgStore } from "./lib/stateStore";
 
 export default function App() {
-
   // State tracked for state of debug. 
   const nodes = useArgStore(state => state.nodes);
   const edges = useArgStore(state => state.edges);
-  const text = useArgStore(state => state.text);
+
+  const setArgumentCache = useArgStore(state => state.setArgumentCache);
+  const loadArgument = useArgStore(state => state.loadArgument);
+
+  // Temporary fix. Will ultimately want to have a built out system for loading new arguments
+  useEffect(() => {
+    // Only load if no argument is present
+    if (!useArgStore.getState().argumentID) {
+      fetch("./x_squared_is_even.yaml")
+        .then(res => res.text())
+        .then(yamlText => {
+          const rawData = YAML.load(yamlText);
+          const newArgs = argumentsFromYAML(rawData);
+          setArgumentCache(new Map(newArgs.arguments.map(a => [a.id, a])));
+          loadArgument(newArgs.default_argument);
+        })
+        .catch(err => {
+          alert("Failed to load default argument: " + err);
+        });
+    }
+  }, []);
 
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
@@ -27,7 +47,7 @@ export default function App() {
         >
           🔍 Trace Dependencies of Last Claim
         </button>
-        <button onClick={() => console.log("Graph debug:", [nodes, edges, text])}>
+        <button onClick={() => console.log("Graph debug:", [nodes, edges])}>
           🧪 Print Graph State
         </button>
 
