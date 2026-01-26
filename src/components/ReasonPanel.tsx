@@ -101,9 +101,9 @@ function ReasonEditor({selectedID}:any){
 export default function ReasonPanel() {
   const {selectedNodes} = useArgStore(
     useShallow(selector),
-  );  
-
+  );
   
+  const stepIntoArgument = useArgStore(state => state.stepIntoArgument);
 
   return (
     <div  className="reason-panel">
@@ -111,8 +111,15 @@ export default function ReasonPanel() {
       Reason Panel
       </div>
       {selectedNodes.length == 1 ? 
-      <ReasonEditor 
-        selectedID={selectedNodes[0].id}/> : null}
+      <>
+        <ReasonEditor 
+          selectedID={selectedNodes[0].id}/>
+        {selectedNodes[0].justification ?
+        <><br/><button
+          onClick={()=>stepIntoArgument(selectedNodes[0].justification)}
+        >Step Into Justification</button></> : null
+        }
+      </> : null}
     </div>
   );
 }

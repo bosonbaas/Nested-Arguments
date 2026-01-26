@@ -23,6 +23,7 @@ const ZodReasonAtRest = z.object({
     x: z.number(),
     y: z.number()
   }),
+  justification: z.optional(z.string()),
   dependencies: z.array(
     z.tuple(
       [z.union([z.string(), z.null()]),
@@ -125,6 +126,7 @@ export function argumentFromYAML(yamlData: any){
       height: n.height,
       width: n.width,
       position: n.position,
+      justification: n.justification,
       data: {
         label: n.label,
         dependencies: dependencies,

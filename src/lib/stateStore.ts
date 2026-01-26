@@ -10,6 +10,7 @@ export const customNanoid = customAlphabet("0123456789abcdefghijklmnopqrstuvwxyz
 
 export type NodeType = "claim" | "reason" | "comment" | "rebuttal"
 
+// Will want to create types of "claim", "reason", "comment", and "rebuttal" that extend the node type.
 export type Node = {
   // This ID must be unique. Text is used to give a human-readable string
   id: string;
@@ -20,6 +21,7 @@ export type Node = {
   initialWidth?: number;
   initialHeight?: number;
   style?: any;
+  justification?: string;
   // Dependencies describe the input ports and their ids
   data: {
     hover: boolean;
@@ -58,7 +60,7 @@ export interface StoreState {
   // Contains any arguments contained in the imported file, as well as any
   // arguments previously loaded from online sources.
   argumentCache: Map<string, Argument>;
-  argumentID: string,
+  breadCrumbs: string[],
 
   nodes: Node[];
   edges: Edge[];
@@ -81,7 +83,6 @@ export interface StoreState {
   setEdges: (edges: Edge[]) => void;
   setHighlights: (h: Highlight[]) => void;
   setName: (name: string) => void;
-  setArgumentID: (name: string) => void;
   setArgumentCache: (args: Map<string, Argument>) => void;
 
   setSelectedNodes: (nodes: Node[]) => void;
@@ -114,14 +115,16 @@ export interface StoreState {
   onNodesDelete: (deleted: any) => void;
 
   // Update current active argument
-  switchArgument: (new_arg: string) => boolean;
-  loadArgument: (new_arg: string) => boolean;
   saveArgument: () => void;
+  loadArgument: (new_arg: string, breadCrumbs?: string[]) => boolean;
+  switchArgument: (new_arg: string, breadCrumbs?: string[]) => boolean;
+  stepIntoArgument: (new_arg: string) => boolean;
+  returnToArgument: (breadcrumb_index: number) => boolean;
 }
 
 export const useArgStore = create<StoreState>((set, get) => ({
   argumentCache: new Map(),
-  argumentID: "",
+  breadCrumbs: [],
 
   nodes: [],
   edges: [],
@@ -139,7 +142,6 @@ export const useArgStore = create<StoreState>((set, get) => ({
   setEdges: (edges) => set(() => ({edges})),
   setHighlights: h => set(() => ({ highlights: h })),
   setName: name => set(() => ({ name })),
-  setArgumentID: argumentID => set(() => ({ argumentID })),
   setArgumentCache: argumentCache => set(() => ({ argumentCache })),
 
   setSelectedNodes: nodes => set(() => ({ selectedNodes: nodes })),
@@ -399,18 +401,9 @@ export const useArgStore = create<StoreState>((set, get) => ({
   },
 
   /**
-   * Unloads current argument (saving current state in cache), and then loads
-   * the desired argument.
-   */
-  switchArgument: (arg_id) => {
-    get().saveArgument()
-    return get().loadArgument(arg_id)
-  },
-
-  /**
    * Loads argument from argument stache, overwriting the current argument data
    */
-  loadArgument: (arg_id) => {
+  loadArgument: (arg_id, breadCrumbs = []) => {
     if(get().argumentCache.has(arg_id)){
       set((state) => {
         const new_arg = state.argumentCache.get(arg_id)
@@ -418,7 +411,7 @@ export const useArgStore = create<StoreState>((set, get) => ({
           state.argumentEditor.setContents(new_arg?.delta)
         }
         return {
-          argumentID: arg_id,
+          breadCrumbs: breadCrumbs.concat(arg_id),
           nodes: new_arg?.nodes,
           edges: new_arg?.edges,
           highlights: new_arg?.highlights
@@ -434,23 +427,41 @@ export const useArgStore = create<StoreState>((set, get) => ({
    * Saves the current argument state into the cache so it can be loaded later.
    */
   saveArgument: () => {
-    if(get().argumentID === ""){
+    if(get().breadCrumbs.length === 0){
       console.log("ERROR: No argument currently loaded.")
       return;
     }
     set((state) => {
+      const curArgument = state.breadCrumbs[state.breadCrumbs.length - 1]
       const curDelta = state.argumentEditor ? state.argumentEditor.getContents() : {} as Delta;
-      const newCache = new Map(state.argumentCache).set(state.argumentID, {
+      const newCache = new Map(state.argumentCache).set(curArgument, {
         nodes: state.nodes,
         edges: state.edges,
         highlights: state.highlights,
         delta: curDelta,
         name: state.name,
-        id: state.argumentID
+        id: curArgument
       })
       return {
         argumentCache: newCache
       }
     })
-  }
+  },
+  
+  /**
+   * Unloads current argument (saving current state in cache), and then loads
+   * the desired argument.
+   */
+  switchArgument: (arg_id, breadCrumbs = []) => {
+    get().saveArgument()
+    return get().loadArgument(arg_id, breadCrumbs)
+  },
+
+  stepIntoArgument: (new_arg) => {
+    return get().switchArgument(new_arg, get().breadCrumbs)
+  },
+
+  returnToArgument: (breadcrumb_index) => {
+    return get().switchArgument(get().breadCrumbs[breadcrumb_index], get().breadCrumbs.slice(0, breadcrumb_index))
+  },
 }));

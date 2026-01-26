@@ -137,6 +137,7 @@ arguments:
           "y": 219
         width: 167
         height: 58
+        justification: square_both_sides
         dependencies:
           - - x = 2k
             - cALV3B8sJPcS7oy0Q9MmeI

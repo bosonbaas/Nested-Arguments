@@ -28,6 +28,7 @@ const ZodReasonAtRest = z.object({
     x: z.number(),
     y: z.number()
   }),
+  justification: z.union([z.string(), z.null()]),
   dependencies: z.array(
     z.tuple(
       [z.union([z.string(), z.null()]),
@@ -77,6 +78,7 @@ type IntermedNode = {
   type: NodeType,
   height: Number,
   width: Number,
+  justification?: String,
   position: {x: Number, y: Number},
   dependencyOrder: string[],
   conclusionOrder: string[],
@@ -92,7 +94,6 @@ const selector = (state: StoreState) => ({
   setEdges: state.setEdges,
   setHighlights: state.setHighlights,
   setName: state.setName,
-  setArgumentID: state.setArgumentID,
   setArgumentCache: state.setArgumentCache,
   loadArgument: state.loadArgument
 });
@@ -102,7 +103,7 @@ export default function FilePanel() {
   const argumentEditor = useArgStore(state => state.argumentEditor);
 
   // useShallow may not make sense here
-  const { highlights, setNodes, setEdges, setHighlights, setName, setArgumentID, setArgumentCache, loadArgument} = useArgStore(
+  const { highlights, setNodes, setEdges, setHighlights, setName, setArgumentCache, loadArgument} = useArgStore(
     useShallow(selector),
   );
 
@@ -117,6 +118,7 @@ export default function FilePanel() {
         const rawData = YAML.load(yamlText) as any;
 
         const newArgs = argumentsFromYAML(rawData);
+        console.log(newArgs)
 
         //TODO: Add logic for error catching
 
@@ -149,6 +151,7 @@ export default function FilePanel() {
           height: node.height,
           width: node.width,
           position: node.position,
+          justification: node.justification,
           dependencyOrder: node.data.dependencies,
           conclusionOrder: node.data.conclusions,
           dependencies: node.data.dependencies.reduce((acc, dep) => {
@@ -200,6 +203,7 @@ export default function FilePanel() {
         position: node.position,
         width: node.width,
         height: node.height,
+        justification: node.justification,
         dependencies: node.dependencyOrder.map((dep) => [dep, node.dependencies[dep]]),
         conclusions: node.conclusionOrder.map((conc) => [conc, node.conclusions[conc]])
       } as ReasonAtRest))

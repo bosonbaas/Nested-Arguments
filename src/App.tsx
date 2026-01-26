@@ -12,6 +12,8 @@ export default function App() {
   // State tracked for state of debug. 
   const nodes = useArgStore(state => state.nodes);
   const edges = useArgStore(state => state.edges);
+  const breadCrumbs = useArgStore(state => state.breadCrumbs);
+  const returnToArgument = useArgStore(state => state.returnToArgument);
 
   const setArgumentCache = useArgStore(state => state.setArgumentCache);
   const loadArgument = useArgStore(state => state.loadArgument);
@@ -19,7 +21,7 @@ export default function App() {
   // Temporary fix. Will ultimately want to have a built out system for loading new arguments
   useEffect(() => {
     // Only load if no argument is present
-    if (!useArgStore.getState().argumentID) {
+    if (useArgStore.getState().breadCrumbs.length == 0) {
       fetch("./x_squared_is_even.yaml")
         .then(res => res.text())
         .then(yamlText => {
@@ -34,21 +36,24 @@ export default function App() {
     }
   }, []);
 
+  const htmlBreadCrumbs = breadCrumbs.map((e, i) => {
+    return (
+      <button
+        key = {i} 
+        onClick= {() => returnToArgument(i)}
+      >{e}</button>
+    )
+  })
+
   return (
     <div style={{ display: "flex", height: "100vh", width: "100vw" }}>
       <div style={{ flex: 1, padding: "1rem", borderRight: "1px solid #ccc" }}>
-        <h2>Argument Text</h2>
+        {htmlBreadCrumbs}
         <EditorContainer />
         <hr style={{ margin: "1rem 0" }} />
-        <button onClick={() => alert("Toggle dependencies")}>🎯 Toggle Dependency Highlights</button>
-        <br />
-        <button
-          onClick={() => alert("Trace dependencies")}
-        >
-          🔍 Trace Dependencies of Last Claim
-        </button>
+        
         <button onClick={() => console.log("Graph debug:", [nodes, edges])}>
-          🧪 Print Graph State
+          🧪 Print Graph State to Console
         </button>
 
         <FilePanel />
@@ -56,7 +61,6 @@ export default function App() {
 
       <div style={{display: "flex", flex: 2, padding: "1rem" }}>
         <div style = {{flex: 2, height: "100%"}}>
-        <h2>Graph Canvas</h2>
         <GraphCanvas />
         </div>
       </div>
